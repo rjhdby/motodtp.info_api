@@ -9,7 +9,7 @@
          bootstrap="test/bootstrap.php"
 >
  <testsuites>
-  <testsuite name="RxPHP Test Suite">
+  <testsuite name="motodtp.info_api Test Suite">
    <directory suffix="Test.php">./test/</directory>
   </testsuite>
  </testsuites>
@@ -18,7 +18,7 @@
    <directory suffix=".php">./class/</directory>
    <exclude>
     <directory suffix="Interface.php">./class/</directory>
-    <file>./class/db/MyPdoConnection.php</file>
+    <file>./class/db/ApkDb.php</file>
    </exclude>
   </whitelist>
  </filter>

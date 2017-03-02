@@ -1,11 +1,11 @@
 {
-  "name": "rjhdby/php-api-skeleton",
-  "description": "Simple skeleton for php backend api.",
+  "name": "rjhdby/motodtp.info_api",
+  "description": "rjhdby/motodtp.info_api",
   "keywords": [
     "skeleton",
     "api"
   ],
-  "homepage": "https://github.com/rjhdby/php-api-skeleton",
+  "homepage": "https://github.com/rjhdby/motodtp.info_api",
   "type": "library",
   "license": "MIT",
   "authors": [
