@@ -10,7 +10,7 @@ class GetDetails implements MethodInterface
     private $result = ['m' => [], 'v' => [], 'h' => [], 'u' => []];
     private $id;
 
-    private static $messagesQuery   = 'SELECT id, id_user AS o, UNIX_TIMESTAMP(a.modified) AS ut, text AS t FROM messages WHERE id_ent=:id';
+    private static $messagesQuery   = 'SELECT id, id_user AS o, UNIX_TIMESTAMP(created) AS ut, text AS t FROM messages WHERE id_ent=:id';
     private static $volunteersQuery = 'SELECT id_user AS o, status AS s, UNIX_TIMESTAMP(timest) AS ut FROM onway WHERE id=:id';
     private static $historyQuery    = '';
     private static $usersQuery      = 'SELECT id, login 

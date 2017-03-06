@@ -20,7 +20,8 @@ class Controller
      *
      * @param array $data
      */
-    public function __construct ($data) {
+    public function __construct($data)
+    {
         $this->data    = $data;
         $this->methods = STATIC_MAPPING
             ? self::mapStatic()
@@ -30,11 +31,13 @@ class Controller
         }
     }
 
-    private static function mapStatic () {
+    private static function mapStatic()
+    {
         return Config::parseCustomConfig(METHODS);
     }
 
-    private static function mapDynamic () {
+    private static function mapDynamic()
+    {
         $methods = [];
         foreach (scandir(ROOT . '/class/methods') as $fileName) {
             if (substr($fileName, -4) !== '.php') {
@@ -49,7 +52,8 @@ class Controller
         return $methods;
     }
 
-    private static function parseTokens ($tokens) {
+    private static function parseTokens($tokens)
+    {
         $namespace = '';
         $method    = '';
         for ($i = 0, $max = count($tokens); $i < $max; $i++) {
@@ -74,10 +78,11 @@ class Controller
      *
      * @return array
      */
-    public function run () {
-        $result = ['r' => [], 'e' => []];
+    public function run()
+    {
+        $result = ['r' => [], 'e' => (object)[]];
         if (!isset($this->data[METHOD])) {
-            $result['e'] = ['code' => 0, 'text' => 'Unknown method'];
+            $result['e'] = ['code' => 1, 'text' => 'Unknown method'];
             return $result;
         }
         $methodName = $this->data[METHOD];
