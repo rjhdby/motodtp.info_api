@@ -12,6 +12,7 @@ namespace methods;
 
 use BadMethodCallException;
 use core\MethodInterface;
+use errors\Codes;
 
 class WrongMethod implements MethodInterface
 {
@@ -21,14 +22,16 @@ class WrongMethod implements MethodInterface
      * Method constructor.
      * @param array $data
      */
-    public function __construct($data = null) {
-        $this->text = isset($data[ METHOD ]) ? 'Wrong method ' . $data[ METHOD ] : 'Unknown method';
+    public function __construct($data = null)
+    {
+        $this->text = isset($data[METHOD]) ? 'Wrong method ' . $data[METHOD] : 'Unknown method';
     }
 
     /**
      * @throws \BadMethodCallException
      */
-    public function __invoke() {
-        throw new BadMethodCallException($this->text);
+    public function __invoke()
+    {
+        throw new BadMethodCallException($this->text, Codes::WRONG_METHOD);
     }
 }

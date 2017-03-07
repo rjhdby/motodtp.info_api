@@ -4,6 +4,7 @@ namespace methods;
 
 use core\MethodInterface;
 use db\ApkDb;
+use errors\Codes;
 
 class GetDetails implements MethodInterface
 {
@@ -24,14 +25,17 @@ class GetDetails implements MethodInterface
      * Method constructor.
      * @param array $data
      */
-    public function __construct ($data) {
-        $this->id = isset($data['id']) ? intval($data['id']) : 0;
+    public function __construct($data)
+    {
+        if (empty($data['id'])) throw new \InvalidArgumentException('Invalid arguments', Codes::INVALID_ARGUMENTS);
+        $this->id = isset($data['id']);
     }
 
     /**
      * @return array
      */
-    public function __invoke () {
+    public function __invoke()
+    {
         if ($this->id === 0) return $this->result;
         $this->fetchMessages();
         $this->fetchVolunteers();
@@ -40,14 +44,16 @@ class GetDetails implements MethodInterface
         return $this->result;
     }
 
-    private function fetchMessages () {
+    private function fetchMessages()
+    {
         $stmt = ApkDb::getInstance()->prepare(self::$messagesQuery);
         $stmt->bindValue(':id', $this->id, \PDO::PARAM_INT);
         $stmt->execute();
         $this->result['m'] = $stmt->fetchAll(\PDO::FETCH_ASSOC);
     }
 
-    private function fetchVolunteers () {
+    private function fetchVolunteers()
+    {
         $stmt = ApkDb::getInstance()->prepare(self::$volunteersQuery);
         $stmt->bindValue(':id', $this->id, \PDO::PARAM_INT);
         $stmt->execute();
@@ -55,15 +61,17 @@ class GetDetails implements MethodInterface
     }
 
     //stub
-    private function fetchHistory () {
+    private function fetchHistory()
+    {
         $this->result['h'] = [];
-//        $stmt = ApkDb::getInstance()->prepare(self::$historyQuery);
-//        $stmt->bindValue(':id', $this->id, \PDO::PARAM_INT);
-//        $stmt->execute();
-//        $this->result['h'] = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+        //        $stmt = ApkDb::getInstance()->prepare(self::$historyQuery);
+        //        $stmt->bindValue(':id', $this->id, \PDO::PARAM_INT);
+        //        $stmt->execute();
+        //        $this->result['h'] = $stmt->fetchAll(\PDO::FETCH_ASSOC);
     }
 
-    private function fetchUsers () {
+    private function fetchUsers()
+    {
         $stmt = ApkDb::getInstance()->prepare(self::$usersQuery);
         $stmt->bindValue(':id1', $this->id, \PDO::PARAM_INT);
         $stmt->bindValue(':id2', $this->id, \PDO::PARAM_INT);

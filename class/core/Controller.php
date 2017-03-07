@@ -1,6 +1,7 @@
 <?php
 namespace core;
 
+use errors\Codes;
 use methods\WrongMethod;
 
 /**
@@ -80,9 +81,9 @@ class Controller
      */
     public function run()
     {
-        $result = ['r' => [], 'e' => (object)[]];
+        $result = ['r' => (object)[], 'e' => (object)[]];
         if (!isset($this->data[METHOD])) {
-            $result['e'] = ['code' => 1, 'text' => 'Unknown method'];
+            $result['e'] = ['code' => Codes::NO_METHOD, 'text' => 'Unknown method'];
             return $result;
         }
         $methodName = $this->data[METHOD];
