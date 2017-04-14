@@ -13,4 +13,7 @@ class Codes
 
     const NO_USER           = 10;
     const WRONG_CREDENTIALS = 11;
+
+    const USER_IS_READ_ONLY = 20;
+    const CREATE_TIMEOUT    = 21;
 }

@@ -8,7 +8,7 @@ class ControllerTest extends PHPUnit_Framework_TestCase
     public function testWrongMethod() {
         $controller = new Controller([METHOD => 'badMethod']);
         $this->assertEquals(
-            ['r' => [], 'e' => ['code' => 0, 'text' => 'Wrong method badMethod']],
+            ['r' => (object)[], 'e' => ['code' => 0, 'text' => 'Wrong method badMethod']],
             $controller->run()
         );
     }
@@ -16,7 +16,7 @@ class ControllerTest extends PHPUnit_Framework_TestCase
     public function testNoMethod() {
         $controller = new Controller([]);
         $this->assertEquals(
-            ['r' => [], 'e' => ['code' => 0, 'text' => 'Unknown method']],
+            ['r' => (object)[], 'e' => ['code' => 0, 'text' => 'Unknown method']],
             $controller->run()
         );
     }

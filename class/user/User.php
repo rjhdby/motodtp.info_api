@@ -99,4 +99,9 @@ class User
                 return self::STANDARD;
         }
     }
+
+    public static function isReadOnly()
+    {
+        return self::$role == self::READ_ONLY;
+    }
 }

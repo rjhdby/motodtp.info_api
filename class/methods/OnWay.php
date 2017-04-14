@@ -20,9 +20,9 @@ class OnWay implements MethodInterface
     private $id;
     private $owner;
 
-    private static $volunteerStatusSQL = 'INSERT INTO onway (id, id_user, status) VALUES(:id,:owner,:status) ON DUPLICATE KEY UPDATE status=:newStatus, timest = NOW()';
+    private static $volunteerStatusSQL = 'INSERT INTO onway (id, id_user, status) VALUES(:id, :owner, :status) ON DUPLICATE KEY UPDATE status=:newStatus, timest = NOW()';
     private static $updateAccidentSQL  = 'UPDATE entities SET modified = NOW() WHERE id=:id';
-    private static $historySQL         = 'INSERT INTO history (id_ent, id_user, action) VALUES (:id,:owner,:action)';
+    private static $historySQL         = 'INSERT INTO history (id_ent, id_user, action) VALUES (:id, :owner, :action)';
 
     /**
      * @param array $data
