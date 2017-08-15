@@ -44,13 +44,12 @@ class GetList implements MethodInterface
                         WHEN "mc_m_wo" THEN "wo"
                         ELSE "na"
                         END AS medicine
-					, MAX(t2.id) AS lm
+					,IFNULL(MAX(t2.id), 0) AS lm
 				FROM
 					entities t1
-					, messages t2
+				LEFT JOIN messages t2 ON t1.id=t2.id_ent
 				WHERE
 					1=1
-					AND t1.id=t2.id_ent
 					AND t1.status != "acc_status_dbl"
 					AND t1.id>=:minId
 				GROUP BY t1.id';
@@ -60,6 +59,11 @@ class GetList implements MethodInterface
     /**
      * Method constructor.
      * @param array $data
+     *
+     * $data keys
+     * a - age in hours
+     * u - user id
+     * i - incremental. Fetch events modified after last fetch
      */
     public function __construct ($data) {
         $this->age = isset($data['a']) ? intval($data['a']) : $this->age;

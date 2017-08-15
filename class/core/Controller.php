@@ -83,7 +83,7 @@ class Controller
     {
         $result = ['r' => (object)[], 'e' => (object)[]];
         if (!isset($this->data[METHOD])) {
-            $result['e'] = ['code' => Codes::NO_METHOD, 'text' => 'Unknown method'];
+            $result['e'] = ['c' => Codes::NO_METHOD, 't' => 'Unknown method'];
             return $result;
         }
         $methodName = $this->data[METHOD];
@@ -98,7 +98,7 @@ class Controller
             $request     = new $class($this->data);
             $result['r'] = $request();
         } catch (\Exception $e) {
-            $result['e'] = ['code' => $e->getCode(), 'text' => $e->getMessage()];
+            $result['e'] = ['c' => $e->getCode(), 't' => $e->getMessage()];
         }
 
         return $result;
