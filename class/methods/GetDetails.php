@@ -13,13 +13,31 @@ class GetDetails implements MethodInterface
 
     private static $messagesQuery   = 'SELECT id, id_user AS o, UNIX_TIMESTAMP(created) AS ut, text AS t FROM messages WHERE id_ent=:id';
     private static $volunteersQuery = 'SELECT id_user AS o, status AS s, UNIX_TIMESTAMP(timest) AS ut FROM onway WHERE id=:id';
-    private static $historyQuery    = '';
+    private static $historyQuery    = 'SELECT 
+                                          id_user AS o, 
+                                          UNIX_TIMESTAMP(timest) AS ut, 
+                                          CASE `action`
+                                            WHEN "acc_status_act" THEN "a"
+                                            WHEN "acc_status_end" THEN "e"
+                                            WHEN "acc_status_hide"  THEN "h"
+                                            WHEN "ban" THEN "b"
+                                            WHEN "create_mc_acc" THEN "c"
+                                            WHEN "inplace"  THEN "i"
+                                            WHEN "leave" THEN "l"
+                                            WHEN "onway" THEN "o"
+                                            WHEN "cancel" THEN "cl"
+                                            ELSE "na"
+                                          END AS a
+                                        FROM history 
+                                        WHERE id_ent=:id';
     private static $usersQuery      = 'SELECT id, login 
                                         FROM users 
                                         WHERE 1=1 
                                           AND id IN (SELECT id_user FROM messages WHERE id_ent=:id1
                                                       UNION ALL
-                                                     SELECT id_user FROM onway WHERE id=:id2)';
+                                                     SELECT id_user FROM onway WHERE id=:id2
+                                                      UNION ALL
+                                                     SELECT id_user FROM history WHERE id_ent=:id3)';
 
     /**
      * Method constructor.
@@ -28,7 +46,7 @@ class GetDetails implements MethodInterface
     public function __construct($data)
     {
         if (empty($data['id'])) throw new \InvalidArgumentException('Invalid arguments', Codes::INVALID_ARGUMENTS);
-        $this->id = isset($data['id']);
+        $this->id = $data['id'];
     }
 
     /**
@@ -49,7 +67,9 @@ class GetDetails implements MethodInterface
         $stmt = ApkDb::getInstance()->prepare(self::$messagesQuery);
         $stmt->bindValue(':id', $this->id, \PDO::PARAM_INT);
         $stmt->execute();
-        $this->result['m'] = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+        while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
+            $this->result['m'][] = ['id' => (int)$row['id'], 'o' => (int)$row['o'], 'ut' => (int)$row['ut'], 't' => $row['t']];
+        }
     }
 
     private function fetchVolunteers()
@@ -60,14 +80,14 @@ class GetDetails implements MethodInterface
         $this->result['v'] = $stmt->fetchAll(\PDO::FETCH_ASSOC);
     }
 
-    //stub
     private function fetchHistory()
     {
-        $this->result['h'] = [];
-        //        $stmt = ApkDb::getInstance()->prepare(self::$historyQuery);
-        //        $stmt->bindValue(':id', $this->id, \PDO::PARAM_INT);
-        //        $stmt->execute();
-        //        $this->result['h'] = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+        $stmt = ApkDb::getInstance()->prepare(self::$historyQuery);
+        $stmt->bindValue(':id', $this->id, \PDO::PARAM_INT);
+        $stmt->execute();
+        while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
+            $this->result['h'][] = ['o' => (int)$row['o'], 'ut' => (int)$row['ut'], 'a' => $row['a']];
+        }
     }
 
     private function fetchUsers()
@@ -75,6 +95,7 @@ class GetDetails implements MethodInterface
         $stmt = ApkDb::getInstance()->prepare(self::$usersQuery);
         $stmt->bindValue(':id1', $this->id, \PDO::PARAM_INT);
         $stmt->bindValue(':id2', $this->id, \PDO::PARAM_INT);
+        $stmt->bindValue(':id3', $this->id, \PDO::PARAM_INT);
         $stmt->execute();
         while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
             $this->result['u'][$row['id']] = $row['login'];

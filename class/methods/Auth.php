@@ -16,6 +16,9 @@ class Auth implements MethodInterface
 
     /**
      * @param array $data
+     * l - login
+     * p - password hash
+     * d - device ID (unused)
      */
     public function __construct($data)
     {
