@@ -18,7 +18,7 @@ class EndAccident extends MethodWithAuth
     public function __construct($data)
     {
         parent::__construct($data);
-        if (User::isReadOnly()) throw new \InvalidArgumentException("Read only", Codes::READ_ONLY);
+        if (User::isReadOnly()) throw new \InvalidArgumentException("Read only", Codes::INSUFFICIENT_RIGHTS);
         if (empty($data["id"])) throw new \InvalidArgumentException("Invalid arguments", Codes::INVALID_ARGUMENTS);
         $this->id = $data["id"];
     }

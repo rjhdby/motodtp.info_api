@@ -104,4 +104,9 @@ class User
     {
         return self::$role == self::READ_ONLY;
     }
+
+    public static function isModerator()
+    {
+        return in_array(self::$role, [self::MODERATOR, self::DEVELOPER]);
+    }
 }
