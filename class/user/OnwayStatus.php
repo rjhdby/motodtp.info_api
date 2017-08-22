@@ -5,10 +5,10 @@ use db\ApkDb;
 
 class OnwayStatus
 {
-    const ON_WAY   = 0;
-    const IN_PLACE = 1;
-    const LEAVE    = 2;
-    const CANCEL   = 4;
+    const ON_WAY   = 'onway';
+    const IN_PLACE = 'inplace';
+    const LEAVE    = 'leave';
+    const CANCEL   = 'cancel';
 
     private static $volunteerStatusSQL = 'INSERT INTO onway (id, id_user, `status`) VALUES(:id, :owner, :status) ON DUPLICATE KEY UPDATE status=:newStatus, timest = NOW()';
     private static $updateAccidentSQL  = 'UPDATE entities SET modified = NOW() WHERE id=:id';
@@ -16,22 +16,22 @@ class OnwayStatus
 
     public static function setOnway($id)
     {
-        self::changeStatus($id, 'onway');
+        self::changeStatus($id, self::ON_WAY);
     }
 
-    public static function setInplace($id)
+    public static function setInPlace($id)
     {
-        self::changeStatus($id, 'inplace');
+        self::changeStatus($id, self::IN_PLACE);
     }
 
     public static function setLeave($id)
     {
-        self::changeStatus($id, 'leave');
+        self::changeStatus($id, self::LEAVE);
     }
 
     public static function setCancel($id)
     {
-        self::changeStatus($id, 'cancel');
+        self::changeStatus($id, self::CANCEL);
     }
 
     private static function changeStatus($id, $status)

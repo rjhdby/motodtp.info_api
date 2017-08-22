@@ -3,11 +3,10 @@
 
 namespace methods;
 
-use core\MethodInterface;
 use errors\Codes;
 use user\OnwayStatus;
 
-class CancelOnWay implements MethodInterface
+class CancelOnWay extends MethodWithAuth
 {
     private $id;
 
@@ -16,8 +15,7 @@ class CancelOnWay implements MethodInterface
      */
     public function __construct($data)
     {
-        $auth = new Auth($data);
-        $auth();
+        parent::__construct($data);
         if (empty($data["id"])) throw new \InvalidArgumentException("Invalid arguments", Codes::INVALID_ARGUMENTS);
 
         $this->id = $data['id'];

@@ -1,13 +1,14 @@
 <?php
-/** @api-call onway */
+/** @api-call hideAccident */
 
 namespace methods;
 
-use core\MethodInterface;
-use errors\Codes;
-use user\OnwayStatus;
 
-class OnWay extends MethodWithAuth
+use accidents\AccidentStatus;
+use errors\Codes;
+use user\User;
+
+class HideAccident extends MethodWithAuth
 {
     private $id;
 
@@ -17,9 +18,9 @@ class OnWay extends MethodWithAuth
     public function __construct($data)
     {
         parent::__construct($data);
+        if (User::isReadOnly()) throw new \InvalidArgumentException("Read only", Codes::READ_ONLY);
         if (empty($data["id"])) throw new \InvalidArgumentException("Invalid arguments", Codes::INVALID_ARGUMENTS);
-
-        $this->id = $data['id'];
+        $this->id = $data["id"];
     }
 
     /**
@@ -28,7 +29,7 @@ class OnWay extends MethodWithAuth
      */
     public function __invoke()
     {
-        OnwayStatus::setOnway($this->id);
+        AccidentStatus::setHidden($this->id);
         return ['ok'];
     }
 }

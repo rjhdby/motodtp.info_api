@@ -2,12 +2,11 @@
 /** @api-call newMessage */
 namespace methods;
 
-use core\MethodInterface;
 use db\ApkDb;
 use errors\Codes;
 use user\User;
 
-class NewMessage implements MethodInterface
+class NewMessage extends MethodWithAuth
 {
     private $id;
     private $text;
@@ -24,8 +23,7 @@ class NewMessage implements MethodInterface
      */
     public function __construct($data)
     {
-        $auth = new Auth($data);
-        $auth();
+        parent::__construct($data);
         if (User::isReadOnly()) throw new \InvalidArgumentException("Read only", Codes::READ_ONLY);
         if (empty($data["id"]) || empty($data["t"])) throw new \InvalidArgumentException("Invalid arguments", Codes::INVALID_ARGUMENTS);
         $this->id   = $data["id"];

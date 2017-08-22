@@ -7,7 +7,7 @@ use core\MethodInterface;
 use errors\Codes;
 use user\OnwayStatus;
 
-class InPlace implements MethodInterface
+class InPlace extends MethodWithAuth
 {
     private $id;
 
@@ -16,8 +16,7 @@ class InPlace implements MethodInterface
      */
     public function __construct($data)
     {
-        $auth = new Auth($data);
-        $auth();
+        parent::__construct($data);
         if (empty($data["id"])) throw new \InvalidArgumentException("Invalid arguments", Codes::INVALID_ARGUMENTS);
 
         $this->id = $data['id'];
@@ -29,7 +28,7 @@ class InPlace implements MethodInterface
      */
     public function __invoke()
     {
-        OnwayStatus::setInplace($this->id);
+        OnwayStatus::setInPlace($this->id);
         return ['ok'];
     }
 }
