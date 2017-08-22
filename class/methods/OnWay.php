@@ -3,7 +3,6 @@
 
 namespace methods;
 
-use core\MethodInterface;
 use errors\Codes;
 use user\OnwayStatus;
 
