@@ -1,5 +1,5 @@
 <?php
-/** @api-call onway */
+/** @api-call cancel */
 
 namespace methods;
 
@@ -7,7 +7,7 @@ use core\MethodInterface;
 use errors\Codes;
 use user\OnwayStatus;
 
-class OnWay implements MethodInterface
+class CancelOnWay implements MethodInterface
 {
     private $id;
 
@@ -29,7 +29,7 @@ class OnWay implements MethodInterface
      */
     public function __invoke()
     {
-        OnwayStatus::setOnway($this->id);
+        OnwayStatus::setCancel($this->id);
         return ['ok'];
     }
 }
