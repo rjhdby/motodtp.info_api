@@ -2,6 +2,7 @@
 /** @api-call getDetails */
 namespace methods;
 
+use core\EmptyObject;
 use core\MethodInterface;
 use db\ApkDb;
 use errors\Codes;
@@ -11,7 +12,7 @@ class GetDetails implements MethodInterface
     private $result = ['m' => [], 'v' => [], 'h' => [], 'u' => []];
     private $id;
 
-    private static $messagesQuery   = 'SELECT id, id_user AS o, UNIX_TIMESTAMP(created) AS ut, text AS t FROM messages WHERE id_ent=:id';
+    private static $messagesQuery   = 'SELECT id, id_ent, id_user AS o, UNIX_TIMESTAMP(created) AS ut, text AS t FROM messages WHERE id_ent=:id';
     private static $volunteersQuery = 'SELECT id_user AS o, status AS s, UNIX_TIMESTAMP(timest) AS ut FROM onway WHERE id=:id';
     private static $historyQuery    = 'SELECT 
                                           id_user AS o, 
@@ -68,7 +69,13 @@ class GetDetails implements MethodInterface
         $stmt->bindValue(':id', $this->id, \PDO::PARAM_INT);
         $stmt->execute();
         while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
-            $this->result['m'][] = ['id' => (int)$row['id'], 'o' => (int)$row['o'], 'ut' => (int)$row['ut'], 't' => $row['t']];
+            $this->result['m'][] = [
+                'id' => (int)$row['id'],
+                'o' => (int)$row['o'],
+                'ut' => (int)$row['ut'],
+                't' => $row['t'],
+                'a' => (int)$row['id_ent']
+            ];
         }
     }
 
@@ -100,5 +107,6 @@ class GetDetails implements MethodInterface
         while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
             $this->result['u'][$row['id']] = $row['login'];
         }
+        if (empty($this->result['u'])) $this->result['u'] = new EmptyObject();
     }
 }
