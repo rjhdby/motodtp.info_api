@@ -3,7 +3,6 @@
 namespace user;
 
 use db\ApkDb;
-use db\AuthDb;
 use errors\Codes;
 
 class User
@@ -17,7 +16,7 @@ class User
     public static $login = '';
     public static $role  = self::STANDARD;
 
-    private static $masterPassHashSQL  = 'SELECT members_pass_hash, members_pass_salt FROM members WHERE name=:login';
+    private static $masterPassHashSQL  = 'SELECT `hash`, salt FROM users WHERE login=:login';
     private static $roleSQL            = 'SELECT id, role FROM users WHERE login=:login';
     private static $createUserSQL      = 'INSERT INTO users (login, register) VALUES (:login, NOW())';
     private static $updateLastGetSQL   = 'UPDATE users SET lastgetlist = NOW() WHERE id=:id';
@@ -43,15 +42,15 @@ class User
 
     public static function auth($login, $passHash)
     {
-        $stmt = AuthDb::getInstance()->prepare(self::$masterPassHashSQL);
+        $stmt = ApkDb::getInstance()->prepare(self::$masterPassHashSQL);
         $stmt->bindValue(':login', $login);
         $stmt->execute();
         $result = $stmt->fetch(\PDO::FETCH_ASSOC);
         if ($result === false) {
             throw new \InvalidArgumentException("No such user", Codes::NO_USER);
         }
-        $masterPassHash = $result['members_pass_hash'];
-        $masterSalt     = $result['members_pass_salt'];
+        $masterPassHash = $result['hash'];
+        $masterSalt     = $result['salt'];
         if (md5(md5($masterSalt) . $passHash) !== $masterPassHash) {
             throw new \InvalidArgumentException("Wrong username or password", Codes::WRONG_CREDENTIALS);
         }

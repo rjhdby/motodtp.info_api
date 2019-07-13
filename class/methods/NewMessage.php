@@ -11,7 +11,8 @@ class NewMessage extends MethodWithAuth
     private $id;
     private $text;
 
-    private static $sql = 'INSERT INTO messages (id_ent, id_user, `text`) VALUES (:id, :owner, :text)';
+    private static $insertSql         = 'INSERT INTO messages (id_ent, id_user, `text`) VALUES (:id, :owner, :text)';
+    private static $updateModifiedSql = 'UPDATE entities SET modified = NOW() WHERE id=:id';
 
     /**
      * @param array $data
@@ -36,11 +37,24 @@ class NewMessage extends MethodWithAuth
      */
     public function __invoke()
     {
-        $stmt = ApkDb::getInstance()->prepare(self::$sql);
+        $this->insertMessage();
+        $this->updateModifiedTime();
+        return ['ok'];
+    }
+
+    private function insertMessage()
+    {
+        $stmt = ApkDb::getInstance()->prepare(self::$insertSql);
         $stmt->bindValue(':id', $this->id);
         $stmt->bindValue(':owner', User::$id);
         $stmt->bindValue(':text', $this->text);
         $stmt->execute();
-        return ['ok'];
+    }
+
+    private function updateModifiedTime()
+    {
+        $stmt = ApkDb::getInstance()->prepare(self::$updateModifiedSql);
+        $stmt->bindValue(':id', $this->id);
+        $stmt->execute();
     }
 }

@@ -8,6 +8,7 @@ use user\User;
 
 class GetList implements MethodInterface
 {
+    protected      $showTest   = false;
     private        $result     = ['l' => [], 'u' => []];
     private        $age        = 24;
     private        $modified   = '2014-01-01 00:00:01';
@@ -45,11 +46,11 @@ class GetList implements MethodInterface
                         ELSE "na"
                         END AS medicine
 					,IFNULL(MAX(t2.id), 0) AS lm
-				FROM
-					entities t1
+					,COUNT(t2.id) AS mc
+					, is_test
+				FROM entities t1
 				LEFT JOIN messages t2 ON t1.id=t2.id_ent
-				WHERE
-					1=1
+				WHERE 1=1
 					AND t1.status != "acc_status_dbl"
 					AND t1.id>=:minId
 				GROUP BY t1.id';
@@ -65,8 +66,10 @@ class GetList implements MethodInterface
      * u - user id
      * i - incremental. Fetch events modified after last fetch
      */
-    public function __construct ($data) {
-        $this->age = isset($data['a']) ? intval($data['a']) : $this->age;
+    public function __construct($data)
+    {
+        $this->age      = isset($data['a']) ? intval($data['a']) : $this->age;
+        $this->showTest = isset($data['test']);
         if (isset($data['i']) && isset($data['u'])) {
             $modified       = User::getLastUpdateTime($data['u']);
             $this->modified = $modified ? $modified : $this->modified;
@@ -78,37 +81,49 @@ class GetList implements MethodInterface
     /**
      * @return array
      */
-    public function __invoke () {
+    public function __invoke()
+    {
         if ($this->minId !== 0) {
-            $this->fetchList();
-            $this->fetchUsers();
+            $this->result['l'] = $this->prepareList($this->fetchList());
+            $this->result['u'] = $this->prepareUsers($this->fetchUsers());
         }
         return $this->result;
     }
 
-    private function fetchList () {
-        $stmt = ApkDb::getInstance()->prepare(self::$listQuery);
+    private function fetchList()
+    {
+        $stmt = ApkDb::getInstance()->prepare(static::$listQuery);
         $stmt->bindValue(':minId', $this->minId, \PDO::PARAM_INT);
         $stmt->execute();
-        while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
-            $this->result['l'][] = [
-                'id' => (int) $row['id'],
-                'ut' => (int) $row['ut'],
-                'a'  => $row['address'],
-                'd'  => $row['description'],
-                's'  => $row['status'],
-                'o'  => (int) $row['owner'],
-                'y'  => (float) $row['lat'],
-                'x'  => (float) $row['lon'],
-                't'  => $row['type'],
-                'm'  => $row['medicine'],
-                'lm' => (int) $row['lm']
-            ];
-        }
+        return $stmt;
     }
 
-    private function fetchMinId () {
-        $stmt = ApkDb::getInstance()->prepare(self::$minIdQuery);
+    protected function prepareList(\PDOStatement $stmt)
+    {
+        $out = [];
+        while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
+            if (!$this->showTest && $row['is_test'] == 1) continue;
+            $out[] = [
+                'id' => (int)$row['id'],
+                'ut' => (int)$row['ut'],
+                'a' => $row['address'],
+                'd' => $row['description'],
+                's' => $row['status'],
+                'o' => (int)$row['owner'],
+                'y' => (float)$row['lat'],
+                'x' => (float)$row['lon'],
+                't' => $row['type'],
+                'm' => $row['medicine'],
+                'lm' => (int)$row['lm'],
+                'mc' => (int)$row['mc'],
+            ];
+        }
+        return $out;
+    }
+
+    private function fetchMinId()
+    {
+        $stmt = ApkDb::getInstance()->prepare(static::$minIdQuery);
         $stmt->bindValue(':age', $this->age, \PDO::PARAM_INT);
         $stmt->bindValue(':modified', $this->modified, \PDO::PARAM_STR);
         $stmt->execute();
@@ -116,12 +131,20 @@ class GetList implements MethodInterface
         return $result ? $result[0] : 0;
     }
 
-    private function fetchUsers () {
-        $stmt = ApkDb::getInstance()->prepare(self::$usersQuery);
+    private function fetchUsers()
+    {
+        $stmt = ApkDb::getInstance()->prepare(static::$usersQuery);
         $stmt->bindValue(':minId', $this->minId, \PDO::PARAM_INT);
         $stmt->execute();
+        return $stmt;
+    }
+
+    protected function prepareUsers(\PDOStatement $stmt)
+    {
+        $out = [];
         while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
-            $this->result['u'][$row['id']] = $row['login'];
+            $out[$row['id']] = $row['login'];
         }
+        return $out;
     }
 }

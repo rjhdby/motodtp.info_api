@@ -6,7 +6,7 @@ use core\MethodInterface;
 use db\ApkDb;
 use errors\Codes;
 
-class GetAccident implements MethodInterface
+class GetAccident extends GetList implements MethodInterface
 {
     private        $id;
     private        $result     = ['l' => [], 'u' => []];
@@ -43,15 +43,16 @@ class GetAccident implements MethodInterface
                         ELSE "na"
                         END AS medicine
 					,IFNULL(MAX(t2.id), 0) AS lm
+					,COUNT(t2.id) AS mc
+					,is_test
 				FROM
 					entities t1
 				LEFT JOIN messages t2 ON t1.id=t2.id_ent
 				WHERE
 					1=1
 					AND t1.status != "acc_status_dbl"
-					AND t1.id = :id
-				GROUP BY t1.id';
-    private static $usersQuery = 'SELECT id, login FROM users WHERE id IN (SELECT DISTINCT owner FROM entities WHERE id = :id)';
+					AND t1.id = :id';
+    private static $usersQuery = 'SELECT id, login FROM users WHERE id=(SELECT owner FROM entities WHERE id=:id LIMIT 1)';
 
     /**
      * Method constructor.
@@ -62,6 +63,8 @@ class GetAccident implements MethodInterface
     public function __construct($data)
     {
         if (empty($data['id'])) throw new \InvalidArgumentException("Invalid arguments", Codes::INVALID_ARGUMENTS);
+        $this->showTest = isset($data['test']);
+        $this->id       = $data['id'];
     }
 
     /**
@@ -69,39 +72,24 @@ class GetAccident implements MethodInterface
      */
     public function __invoke()
     {
-        $this->fetchList();
-        $this->fetchUsers();
+        $this->result['l'] = $this->prepareList($this->fetchAccident());
+        $this->result['u'] = $this->prepareUsers($this->fetchUsers());
         return $this->result;
     }
 
-    private function fetchList()
+    private function fetchAccident()
     {
-        $stmt = ApkDb::getInstance()->prepare(self::$listQuery);
+        $stmt = ApkDb::getInstance()->prepare(static::$listQuery);
         $stmt->bindValue(':id', $this->id, \PDO::PARAM_INT);
         $stmt->execute();
-        $row                 = $stmt->fetch(\PDO::FETCH_ASSOC);
-        $this->result['l'][] = [
-            'id' => (int)$row['id'],
-            'ut' => (int)$row['ut'],
-            'a' => $row['address'],
-            'd' => $row['description'],
-            's' => $row['status'],
-            'o' => (int)$row['owner'],
-            'y' => (float)$row['lat'],
-            'x' => (float)$row['lon'],
-            't' => $row['type'],
-            'm' => $row['medicine'],
-            'lm' => (int)$row['lm']
-        ];
+        return $stmt;
     }
 
     private function fetchUsers()
     {
-        $stmt = ApkDb::getInstance()->prepare(self::$usersQuery);
+        $stmt = ApkDb::getInstance()->prepare(static::$usersQuery);
         $stmt->bindValue(':id', $this->id, \PDO::PARAM_INT);
         $stmt->execute();
-        while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
-            $this->result['u'][$row['id']] = $row['login'];
-        }
+        return $stmt;
     }
 }
