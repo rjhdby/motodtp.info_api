@@ -1,4 +1,5 @@
 <?php
+
 namespace core;
 
 use errors\Codes;
@@ -21,8 +22,7 @@ class Controller
      *
      * @param array $data
      */
-    public function __construct($data)
-    {
+    public function __construct($data) {
         $this->data    = $data;
         $this->methods = STATIC_MAPPING
             ? self::mapStatic()
@@ -32,13 +32,11 @@ class Controller
         }
     }
 
-    private static function mapStatic()
-    {
+    private static function mapStatic() {
         return Config::parseCustomConfig(METHODS);
     }
 
-    private static function mapDynamic()
-    {
+    private static function mapDynamic() {
         $methods = [];
         foreach (scandir(ROOT . '/class/methods') as $fileName) {
             if (substr($fileName, -4) !== '.php') {
@@ -53,8 +51,7 @@ class Controller
         return $methods;
     }
 
-    private static function parseTokens($tokens)
-    {
+    private static function parseTokens($tokens) {
         $namespace = '';
         $method    = '';
         for ($i = 0, $max = count($tokens); $i < $max; $i++) {
@@ -79,8 +76,7 @@ class Controller
      *
      * @return array
      */
-    public function run()
-    {
+    public function run() {
         $result = ['r' => (object)[], 'e' => (object)[]];
         if (!isset($this->data[METHOD])) {
             $result['e'] = ['c' => Codes::NO_METHOD, 't' => 'Unknown method'];
@@ -98,7 +94,7 @@ class Controller
             $request     = new $class($this->data);
             $result['r'] = $request();
         } catch (\Exception $e) {
-            $result['e'] = ['c' => $e->getCode(), 't' => $e->getMessage()];
+            $result['e'] = ['c' => $e->getCode(), 't' => $e->getMessage(), 'trace' => $e->getTraceAsString()];
         }
 
         return $result;

@@ -62,7 +62,7 @@ class GetAccident extends GetList implements MethodInterface
      */
     public function __construct($data)
     {
-        if (empty($data['id'])) throw new \InvalidArgumentException("Invalid arguments", Codes::INVALID_ARGUMENTS);
+        if (!isset($data['id'])) throw new \InvalidArgumentException("Invalid arguments", Codes::INVALID_ARGUMENTS);
         $this->showTest = isset($data['test']);
         $this->id       = $data['id'];
     }

@@ -2,6 +2,7 @@
 namespace accidents;
 
 use db\ApkDb;
+use user\User;
 
 class AccidentStatus
 {
@@ -10,7 +11,8 @@ class AccidentStatus
     const HIDDEN = 'acc_status_hide';
     const DOUBLE = 'acc_status_dbl';
 
-    private static $sql = 'UPDATE entities SET `status`=:status WHERE id=:id';
+    private static $sql     = 'UPDATE entities SET `status`=:status WHERE id=:id';
+    private static $history = 'INSERT INTO history (id_ent, id_user, action) VALUES (:id, :user, :status)';
 
     private static function changeStatus($id, $status)
     {
@@ -18,6 +20,13 @@ class AccidentStatus
         $stmt->bindValue(':status', $status);
         $stmt->bindValue(':id', $id);
         $stmt->execute();
+        $stmt->closeCursor();
+        $stmt = ApkDb::getInstance()->prepare(self::$history);
+        $stmt->bindValue(':status', $status);
+        $stmt->bindValue(':id', $id);
+        $stmt->bindValue(':user', User::$id);
+        $stmt->execute();
+        $stmt->closeCursor();
     }
 
     public static function setEnded($id)

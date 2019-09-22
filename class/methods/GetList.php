@@ -2,6 +2,7 @@
 /** @api-call getList */
 namespace methods;
 
+use core\EmptyObject;
 use core\MethodInterface;
 use db\ApkDb;
 use user\User;
@@ -145,6 +146,7 @@ class GetList implements MethodInterface
         while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
             $out[$row['id']] = $row['login'];
         }
+        if(empty($out))$out=new EmptyObject();
         return $out;
     }
 }

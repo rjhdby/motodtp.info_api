@@ -20,8 +20,9 @@ class CreateAccident extends MethodWithAuth
                               VALUES
                               (NOW(), NOW(), :owner, :lat, :lon, :address, :description, :status, :is_test, :acc_type, :medicine)';
     private static $logSql        = 'INSERT INTO httplog (request) VALUES (:request)';
+    private static $history       = 'INSERT INTO history (id_ent, id_user, action) VALUES (:id, :user, "create_mc_acc")';
     private        $prerequisites = ['a', 'd', 'y', 'x', 't', 'dm'];
-    private static $typesList     = ['b' => 'acc_b', 'm' => 'acc_m', 'ma' => 'acc_m_a', 'mm' => 'acc_m_m', 'mp' => 'acc_m_p', 'o' => 'acc_o'];
+    private static $typesList     = ['b' => 'acc_b', 'm' => 'acc_m', 'ma' => 'acc_m_a', 'mm' => 'acc_m_m', 'mp' => 'acc_m_p', 'o' => 'acc_o', 's' => 'acc_s'];
     private static $damageList    = ['d' => 'mc_m_d', 'h' => 'mc_m_h', 'l' => 'mc_m_l', 'wo' => 'mc_m_wo', 'na' => 'mc_m_na'];
 
     private $data;
@@ -41,7 +42,7 @@ class CreateAccident extends MethodWithAuth
         parent::__construct($data);
         if (User::isReadOnly()) throw new \InvalidArgumentException("Read only", Codes::READ_ONLY);
         foreach ($this->prerequisites as $param) {
-            if (empty($data[$param])) throw new \InvalidArgumentException("Invalid arguments", Codes::INVALID_ARGUMENTS);
+            if (!isset($data[$param])) throw new \InvalidArgumentException("Invalid arguments", Codes::INVALID_ARGUMENTS);
         }
         $this->checkTimeout();
         $this->data = $data;
@@ -65,6 +66,7 @@ class CreateAccident extends MethodWithAuth
     {
         $this->insertAccident();
         $this->log();
+        $this->saveHistory();
         $this->push();
         $this->share();
         return ['id' => $this->id];
@@ -91,6 +93,14 @@ class CreateAccident extends MethodWithAuth
     {
         $stmt = ApkDb::getInstance()->prepare(self::$logSql);
         $stmt->bindValue(':request', json_encode($this->data, true));
+        $stmt->execute();
+    }
+
+    private function saveHistory()
+    {
+        $stmt = ApkDb::getInstance()->prepare(self::$history);
+        $stmt->bindValue(':id', $this->id);
+        $stmt->bindValue(':user', User::$id);
         $stmt->execute();
     }
 

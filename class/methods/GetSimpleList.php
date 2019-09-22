@@ -21,20 +21,24 @@ class GetSimpleList implements MethodInterface
 					a.medicine
 				FROM
 					entities a
-				WHERE NOW() < (DATE_ADD(a.starttime, INTERVAL 24 HOUR))';
+				WHERE 1=1
+				AND NOW() < (DATE_ADD(a.starttime, INTERVAL 24 HOUR))
+				AND a.is_test=0';
 
     /**
      * Method constructor.
      * @param array $data
      */
-    public function __construct ($data = null) {
+    public function __construct($data = null)
+    {
 
     }
 
     /**
      * @return array
      */
-    public function __invoke () {
+    public function __invoke()
+    {
         $stmt = ApkDb::getInstance()->prepare($this->query);
         $stmt->execute();
         $result = $stmt->fetchAll(\PDO::FETCH_ASSOC);
