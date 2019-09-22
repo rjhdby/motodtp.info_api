@@ -20,7 +20,11 @@ class User
     private static $masterPassHashSQL  = 'SELECT `hash`, salt FROM users WHERE login=:login AND vkId IS NULL';
     private static $roleSQL            = 'SELECT id, role FROM users WHERE login=:login';
     private static $createUserSQL      = 'INSERT INTO users (login, register) VALUES (:login, NOW())';
-    private static $createVkUserSQL    = 'INSERT INTO users (login, register, vkId) VALUES (:login, NOW(),:vkId)';
+//    private static $createVkUserSQL    = 'INSERT INTO users (login, register, vkId) VALUES (:login, NOW(),:vkId)';
+    private static $createVkUserSQL    = 'INSERT INTO users (login, register, vkId) VALUES (:login, NOW(),:vkId)
+ON DUPLICATE KEY UPDATE vkId = :vkId';
+
+    //'INSERT INTO onway (id, id_user, `status`) VALUES(:id, :owner, :status) ON DUPLICATE KEY UPDATE status=:newStatus, timest = NOW()';
     private static $getVkUserSQL       = 'SELECT id, role, login FROM users WHERE vkId=:vkId';
     private static $updateLastGetSQL   = 'UPDATE users SET lastgetlist = NOW() WHERE id=:id';
     private static $updateLastLoginSQL = 'UPDATE users SET lastlogin = NOW() WHERE id=:id';
